@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#58a6ff"/>
+      <stop offset="100%" stop-color="#1f6feb"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="30" fill="#0d1117"/>
+  <circle cx="100" cy="70" r="36" fill="url(#g)"/>
+  <text x="100" y="78" font-family="Montserrat, Arial, sans-serif" font-size="28" font-weight="800" fill="#fff" text-anchor="middle">SIAP</text>
+  <text x="100" y="110" font-family="Inter, Arial, sans-serif" font-size="10" fill="#cfefff" text-anchor="middle">SPPG</text>
+</svg>
