@@ -53,6 +53,11 @@
             padding-bottom: 20px;
         }
 
+        .section.keterangan {
+            margin-top: 20px;
+            padding-top: 15px;
+        }
+
         .section:last-child {
             border-bottom: none;
         }
@@ -207,13 +212,13 @@
     <div class="container">
         <div class="header">
             <h1>SLIP GAJI</h1>
-            <p>PT. SIAP SPPG</p>
+            <p>SPPG Tlahab Lor</p>
         </div>
 
         <div class="slip-content">
             <!-- Data Karyawan -->
             <div class="section">
-                <div class="section-title">DATA KARYAWAN</div>
+                <div class="section-title">DATA RELAWAN</div>
                 <div class="info-row">
                     <div class="info-label">ID Relawan</div>
                     <div class="info-value">{{ $gaji->relawan->id_relawan }}</div>
@@ -221,10 +226,6 @@
                 <div class="info-row">
                     <div class="info-label">Nama Lengkap</div>
                     <div class="info-value">{{ strtoupper($gaji->relawan->nama) }}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Jabatan</div>
-                    <div class="info-value">{{ $gaji->relawan->role }}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Bagian</div>
@@ -273,7 +274,7 @@
 
             <!-- Keterangan -->
             @if ($gaji->keterangan)
-                <div class="section">
+                <div class="section keterangan">
                     <div class="section-title">KETERANGAN</div>
                     <div class="info-value">{{ $gaji->keterangan }}</div>
                 </div>

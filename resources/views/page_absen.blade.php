@@ -11,8 +11,9 @@
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') no-repeat center center fixed;
-      background-size: cover;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #0369a1 50%, #0f172a 75%, #1e293b 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -21,7 +22,21 @@
       padding: 20px;
       color: white;
       box-sizing: border-box;
-      box-shadow: inset 0 0 0 2000px rgba(15, 23, 42, 0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(15, 23, 42, 0.5) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .container {
@@ -34,7 +49,9 @@
       -webkit-backdrop-filter: blur(25px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 30px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 60px rgba(56, 189, 248, 0.2);
+      position: relative;
+      z-index: 2;
     }
 
     .logo-container {
@@ -142,6 +159,12 @@
     .back-button:hover {
       background: rgba(56, 189, 248, 0.18);
       transform: translateY(-1px);
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
