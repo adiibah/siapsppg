@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicScanController;
 use App\Http\Controllers\RelawanController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\GajiController;
+use App\Http\Controllers\AttendanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +22,9 @@ Route::get('/', function () {
 Route::get('/scan', [PublicScanController::class, 'index'])->name('public.scan');
 Route::get('/page_absen', [PublicScanController::class, 'pageAbsen'])->name('public.page_absen');
 Route::post('/scan/process', [PublicScanController::class, 'process'])->name('public.scan.process');
+
+// API untuk absensi
+Route::post('/api/attendance/scan', [AttendanceController::class, 'scan'])->name('api.attendance.scan');
 
 
 // 3. --- FITUR ADMIN (MENGGUNAKAN AUTH) ---
@@ -45,5 +48,9 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/gaji/print-slip-gaji/{id}/{bulan}/{tahun}', [GajiController::class, 'printSlipGaji'])
         ->name('gaji.print-slip-gaji');
+
+    // API untuk generate absensi bulanan (admin only)
+    Route::post('/api/attendance/generate-monthly', [AttendanceController::class, 'generateMonthly'])
+        ->name('api.attendance.generate-monthly');
 
 });

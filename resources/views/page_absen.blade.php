@@ -9,6 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
+    :root {
+      --brand: #38bdf8;
+      --brand-2: rgba(56, 189, 248, 0.4);
+      --bg-dim: rgba(0, 0, 0, 0.4);
+      --panel: rgba(255, 255, 255, 0.05);
+      --panel-border: rgba(255, 255, 255, 0.15);
+      --success: #86efac;
+      --warning: #facc15;
+      --danger: #fca5a5;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #0369a1 50%, #0f172a 75%, #1e293b 100%);
@@ -25,6 +36,77 @@
       position: relative;
       overflow: hidden;
     }
+
+    /* Scanner overlay guide */
+    .scanner-overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .scanner-overlay .frame {
+      width: 250px;
+      height: 250px;
+      border-radius: 18px;
+      border: 2px solid rgba(56, 189, 248, 0.65);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+      position: relative;
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .scanner-overlay .frame::before,
+    .scanner-overlay .frame::after {
+      content: '';
+      position: absolute;
+      width: 64px;
+      height: 4px;
+      background: rgba(56, 189, 248, 0.9);
+      border-radius: 999px;
+      opacity: 0.95;
+    }
+
+    .scanner-overlay .frame::before {
+      top: 22px;
+      left: 28px;
+      transform: translateX(0);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+
+    .scanner-overlay .frame::after {
+      bottom: 22px;
+      right: 28px;
+      width: 64px;
+    }
+
+    .scanner-overlay .hint {
+      margin-top: 265px;
+      width: min(320px, 100%);
+      text-align: center;
+      font-size: 12px;
+      color: rgba(226, 232, 240, 0.9);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      line-height: 1.4;
+    }
+
+    /* torch button accessibility (kept by library, just ensure z-index) */
+    #reader .html5-qrcode__torch {
+      z-index: 4 !important;
+    }
+
+    /* Make overlay frame responsive */
+    @media (max-width: 420px) {
+      .scanner-overlay .frame {
+        width: 220px;
+        height: 220px;
+      }
+      .scanner-overlay .hint {
+        margin-top: 235px;
+      }
+    }
+
 
     body::before {
       content: '';
@@ -182,7 +264,12 @@
     
     <div class="scanner-wrapper">
       <div id="reader"></div>
+      <div class="scanner-overlay" aria-hidden="true">
+        <div class="frame"></div>
+        <div class="hint">Posisikan QR di dalam kotak • Tunggu sebentar sampai diproses otomatis</div>
+      </div>
     </div>
+
 
     <div id="result-box">
       <div id="status-content">
@@ -199,10 +286,23 @@
     const resultBox = document.getElementById('result-box');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     let isProcessing = false;
+    let scanLockedUntil = 0;
+
+    function lockScan(ms = 2500) {
+      scanLockedUntil = Date.now() + ms;
+      isProcessing = true;
+    }
+
+    function unlockScan() {
+      isProcessing = false;
+    }
 
     function onScanSuccess(decodedText) {
+      if (Date.now() < scanLockedUntil) return;
       if (isProcessing) return;
-      isProcessing = true;
+
+      lockScan(2500);
+
 
       resultBox.style.background = "rgba(56, 189, 248, 0.15)";
       resultBox.style.borderColor = "rgba(56, 189, 248, 0.4)";
@@ -230,9 +330,10 @@
       .finally(() => {
         setTimeout(() => {
           resetUI();
-          isProcessing = false;
-        }, 3000);
+          unlockScan();
+        }, 2500);
       });
+
     }
 
     function renderResult(res) {
@@ -247,19 +348,23 @@
         <div style="font-size: 28px; margin-bottom: 5px">${icon}</div>
         <div style="color: ${color}; font-size: 16px;">${res.message}</div>
         ${nameLine}
+        <div style="margin-top:10px; font-size:12px; opacity:0.75">${success ? 'Berhasil tersimpan.' : (res.status === 'warning' ? 'Tidak bisa scan lebih dari 2x hari ini.' : 'Coba scan ulang QR.' )}</div>
       `;
       resultBox.style.background = bg;
       resultBox.style.borderColor = border;
     }
+
 
     function resetUI() {
       resultBox.style.background = "rgba(0, 0, 0, 0.4)";
       resultBox.style.borderColor = "rgba(255, 255, 255, 0.1)";
       resultBox.innerHTML = `
         <div style="font-size: 20px; margin-bottom: 5px">📷</div>
-        <div style="opacity: 0.8">Siap Scan Berikutnya...</div>
+        <div style="opacity: 0.8">Siap Scan Berikutnya</div>
+        <div style="margin-top:6px; font-size:12px; opacity:0.75">Arahkan QR ke dalam kotak</div>
       `;
     }
+
 
     const html5QrcodeScanner = new Html5QrcodeScanner(
       "reader",

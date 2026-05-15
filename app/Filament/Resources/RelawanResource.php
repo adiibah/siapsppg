@@ -8,8 +8,12 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables\Filters\SelectFilter; // Tambahkan ini
+use App\Services\AttendanceService;
+use Carbon\Carbon;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
 
 class RelawanResource extends Resource
 {
@@ -109,6 +113,50 @@ class RelawanResource extends Resource
                     ->color('success')
                     ->url(fn (Relawan $record): string => route('relawan.digital-id-card', $record))
                     ->openUrlInNewTab(),
+
+                // FITUR BARU: Action Scan Absensi
+                Action::make('scan_absensi')
+                    ->label('Scan Absensi')
+                    ->icon('heroicon-o-qr-code')
+                    ->color('primary')
+                    ->form([
+                        Forms\Components\Select::make('scan_type')
+                            ->label('Tipe Scan')
+                            ->options([
+                                'masuk' => 'Masuk',
+                                'pulang' => 'Pulang',
+                            ])
+                            ->default('masuk')
+                            ->required(),
+
+                        Forms\Components\TimePicker::make('scan_time')
+                            ->label('Waktu Scan')
+                            ->default(now()->format('H:i:s'))
+                            ->required(),
+                    ])
+                    ->action(function (Relawan $record, array $data) {
+                        $service = app(AttendanceService::class);
+                        $scanTime = Carbon::createFromFormat('H:i:s', $data['scan_time']);
+
+                        $result = $service->processScan($record->id_relawan, $scanTime, $data['scan_type']);
+
+                        if ($result['status'] === 'success') {
+                            Notification::make()
+                                ->title('Absensi Berhasil')
+                                ->body("{$record->nama} - Status: {$result['attendance']->status}")
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Error')
+                                ->body($result['message'])
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->modalHeading('Scan Absensi Manual')
+                    ->modalDescription('Catat absensi manual untuk relawan ini.')
+                    ->modalSubmitActionLabel('Simpan Absensi'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make($bulkActionsArray),

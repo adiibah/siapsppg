@@ -14,7 +14,11 @@ return new class extends Migration
         Schema::create('gajis', function (Blueprint $table) {
             $table->id();
             $table->string('relawan_id');
-            $table->foreign('relawan_id')->references('id_relawan')->on('relawans')->onDelete('cascade');
+            $table->foreign('relawan_id')
+                ->references('id_relawan')
+                ->on('relawans')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
             $table->integer('bulan'); // 1-12
             $table->year('tahun');
             $table->decimal('gaji_pokok', 15, 2)->default(0);
